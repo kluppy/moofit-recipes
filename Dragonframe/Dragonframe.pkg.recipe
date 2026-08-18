@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Identifier</key>
+    <string>com.github.amsysuk-recipes.pkg.Dragonframe</string>
+    <key>Description</key>
+    <string>Turns the download of the latest version of Dragonframe into a
+package</string>
+    <key>Input</key>
+    <dict>
+        <key>NAME</key>
+        <string>Dragonframe</string>
+        <key>CHECK_PAGE_PATTERN</key>
+		<string>(?P&lt;url&gt;https:\/\/www\.dragonframe.com\/download\/Dragonframe_(?P&lt;version&gt;[\d.]+)\.pkg)</string>
+    </dict>
+    <key>ParentRecipe</key>
+    <string>com.github.amsysuk-recipes.download.Dragonframe4</string>
+    <key>Process</key>
+    <array>
+        <dict>
+            <key>Arguments</key>
+            <dict>
+                <key>destination_path</key>
+                <string>%RECIPE_CACHE_DIR%/expanded</string>
+                <key>flat_pkg_path</key>
+                <string>%pathname%</string>
+            </dict>
+            <key>Processor</key>
+            <string>FlatPkgUnpacker</string>
+        </dict>
+        <dict>
+            <key>Arguments</key>
+            <dict>
+                <key>pattern</key>
+                <string>%RECIPE_CACHE_DIR%/expanded/Dragonframe*.pkg</string>
+            </dict>
+            <key>Processor</key>
+            <string>FileFinder</string>
+        </dict>
+        <dict>
+            <key>Arguments</key>
+            <dict>
+                <key>destination_path</key>
+                <string>%RECIPE_CACHE_DIR%/unpack</string>
+                <key>pkg_payload_path</key>
+                <string>%found_filename%/Payload</string>
+            </dict>
+            <key>Processor</key>
+            <string>PkgPayloadUnpacker</string>
+        </dict>
+        <dict>
+            <key>Arguments</key>
+            <dict>
+                <key>find</key>
+                <string>.pkg</string>
+                <key>input_string</key>
+                <string>%found_basename%</string>
+                <key>replace</key>
+                <string></string>
+                <key>result_output_var_name</key>
+                <string>app_name</string>
+            </dict>
+            <key>Processor</key>
+            <string>FindAndReplace</string>
+        </dict>
+
+        <dict>
+            <key>Arguments</key>
+            <dict>
+                <key>info_path</key>
+                <string>%RECIPE_CACHE_DIR%/unpack/Applications/%app_name%/%app_name%.app/Contents/Info.plist</string>
+                <key>plist_keys</key>
+                <dict>
+                    <key>CFBundleShortVersionString</key>
+                    <string>version</string>
+                </dict>
+            </dict>
+            <key>Processor</key>
+            <string>PlistReader</string>
+        </dict>
+        <dict>
+            <key>Arguments</key>
+            <dict>
+                <key>source_pkg</key>
+                <string>%pathname%</string>
+                <key>pkg_path</key>
+                <string>%RECIPE_CACHE_DIR%/%NAME%-%version%.pkg</string>
+            </dict>
+            <key>Processor</key>
+            <string>PkgCopier</string>
+        </dict>
+    </array>
+</dict>
+</plist>
